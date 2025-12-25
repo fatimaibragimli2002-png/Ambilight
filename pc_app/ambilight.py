@@ -21,35 +21,36 @@ import serial
 import serial.tools.list_ports
 import os
 
-# LED Configuration - must match Arduino
+# 💡 LED Configuration - must match Arduino
 NUM_LEDS_LEFT = 19
 NUM_LEDS_TOP = 35
 NUM_LEDS_RIGHT = 19
 NUM_LEDS_TOTAL = NUM_LEDS_LEFT + NUM_LEDS_TOP + NUM_LEDS_RIGHT
 
-# Screen capture zone depth (pixels from edge)
+# 📷 Screen capture zone depth (pixels from edge)
 CAPTURE_DEPTH = 30  # Smaller = faster
 
-# Serial configuration - MUST MATCH ARDUINO
+# 📡 Serial configuration - MUST MATCH ARDUINO
 BAUD_RATE = 115200
 
 
 def set_low_priority():
-    """Set process to low priority to reduce system impact."""
+    """⚙️ Set process to low priority to reduce system impact."""
     try:
         if sys.platform == 'win32':
             import psutil
             p = psutil.Process(os.getpid())
             p.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
-            print("Process priority set to BELOW_NORMAL")
+            print("⚙️ Process priority set to BELOW_NORMAL")
         else:
             os.nice(10)
-            print("Process niceness set to 10")
+            print("⚙️ Process niceness set to 10")
     except:
         pass  # Ignore if we can't set priority
 
 
 class Ambilight:
+    """✨ Low CPU Ambilight controller."""
     def __init__(self, port=None, monitor=0, fps=60, brightness=255, 
                  saturation=1.2, smoothing=0.6):
         self.monitor_num = monitor
@@ -82,7 +83,7 @@ class Ambilight:
         self.last_print = time.time()
     
     def _setup_monitor(self):
-        """Setup monitor and capture regions."""
+        """📺 Setup monitor and capture regions."""
         monitors = self.sct.monitors
         idx = min(self.monitor_num + 1, len(monitors) - 1)
         mon = monitors[idx]
@@ -115,10 +116,10 @@ class Ambilight:
         self.v_seg = self.height // NUM_LEDS_LEFT  # Vertical segment height
         self.h_seg = self.width // NUM_LEDS_TOP    # Horizontal segment width
         
-        print(f"Monitor {self.monitor_num}: {self.width}x{self.height}")
+        print(f"📺 Monitor {self.monitor_num}: {self.width}x{self.height}")
     
     def connect_serial(self, port=None):
-        """Connect to Arduino."""
+        """🤖 Connect to Arduino."""
         if port is None:
             ports = list(serial.tools.list_ports.comports())
             for p in ports:
@@ -128,10 +129,10 @@ class Ambilight:
             if port is None and ports:
                 port = ports[0].device
             if port is None:
-                print("No serial ports found!")
+                print("❌ No serial ports found!")
                 sys.exit(1)
         
-        print(f"Connecting to {port}...")
+        print(f"🔌 Connecting to {port}...")
         try:
             ser = serial.Serial(port, BAUD_RATE, timeout=1)
             time.sleep(2)
@@ -140,17 +141,17 @@ class Ambilight:
             for _ in range(50):
                 if ser.in_waiting:
                     if 'Ada' in ser.readline().decode('utf-8', errors='ignore'):
-                        print("Arduino ready!")
+                        print("✓ Arduino ready!")
                         return ser
                 time.sleep(0.1)
-            print("Connected (no handshake)")
+            print("✓ Connected (no handshake)")
             return ser
         except serial.SerialException as e:
-            print(f"Connection failed: {e}")
+            print(f"✗ Connection failed: {e}")
             sys.exit(1)
     
     def capture_and_sample(self):
-        """Capture edges and sample colors in one pass - OPTIMIZED."""
+        """📷 Capture edges and sample colors in one pass - OPTIMIZED."""
         colors = self.colors
         
         # Capture and process LEFT edge
@@ -182,7 +183,7 @@ class Ambilight:
         return colors
     
     def process_colors(self, colors):
-        """Apply brightness, saturation, and smoothing."""
+        """🎨 Apply brightness, saturation, and smoothing."""
         # Saturation boost
         if self.saturation != 1.0:
             gray = colors.mean(axis=1, keepdims=True)
@@ -207,16 +208,18 @@ class Ambilight:
         return self.output
     
     def send(self, colors):
-        """Send to Arduino."""
+        """📤 Send to Arduino."""
         try:
             self.serial.write(self.header + colors.tobytes())
         except:
             self.running = False
     
     def run(self):
-        """Main loop - CPU friendly."""
-        print(f"\nStarting at {self.target_fps} FPS target")
-        print(f"LEDs: {NUM_LEDS_TOTAL}, Smoothing: {self.smoothing}")
+        """▶️  Main loop - CPU friendly."""
+        print(f"\n🎨 === Ambilight STANDARD ===")
+        print(f"Target Frame Rate: {self.target_fps} FPS")
+        print(f"Total LEDs: {NUM_LEDS_TOTAL}")
+        print(f"Smoothing: {self.smoothing}")
         print("Press Ctrl+C to stop\n")
         
         self.running = True
@@ -239,7 +242,7 @@ class Ambilight:
                 now = time.time()
                 if now - self.last_print > 3.0:
                     fps = self.frame_count / (now - self.last_print)
-                    print(f"FPS: {fps:.1f} | Frame: {elapsed*1000:.1f}ms   ", end='\r')
+                    print(f"📊 FPS: {fps:.1f} | Frame: {elapsed*1000:.1f}ms   ", end='\r')
                     self.frame_count = 0
                     self.last_print = now
                 
@@ -249,33 +252,34 @@ class Ambilight:
                     time.sleep(sleep_time)
                     
         except KeyboardInterrupt:
-            print("\n\nStopping...")
+            print("\n\n⏹️  Stopping...")
         finally:
             self.cleanup()
     
     def cleanup(self):
-        """Cleanup."""
+        """🧹 Cleanup."""
         self.running = False
         if self.serial and self.serial.is_open:
             self.send(np.zeros((NUM_LEDS_TOTAL, 3), dtype=np.uint8))
             time.sleep(0.05)
             self.serial.close()
-            print("Disconnected")
+            print("✅ Disconnected")
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Ambilight - Low CPU')
-    parser.add_argument('--port', '-p', type=str, default=None)
-    parser.add_argument('--monitor', '-m', type=int, default=0)
+    parser = argparse.ArgumentParser(description='🌈 Ambilight - Low CPU')
+    parser.add_argument('--port', '-p', type=str, default='COM3', help='Serial port 🔌')
+    parser.add_argument('--monitor', '-m', type=int, default=0, help='Monitor number')
     parser.add_argument('--fps', '-f', type=int, default=30, help='Target FPS (default: 30, max recommended: 45)')
-    parser.add_argument('--brightness', '-b', type=int, default=255)
-    parser.add_argument('--saturation', '-s', type=float, default=1.2)
-    parser.add_argument('--smoothing', type=float, default=0.6, help='0.3=smooth, 0.7=responsive (default: 0.6)')
-    parser.add_argument('--list-ports', action='store_true')
+    parser.add_argument('--brightness', '-b', type=int, default=255, help='Brightness 0-255 ☀️')
+    parser.add_argument('--saturation', '-s', type=float, default=1.2, help='Saturation boost 🎨')
+    parser.add_argument('--smoothing', type=float, default=0.6, help='0.3=smooth, 0.7=responsive (default: 0.6) 🌊')
+    parser.add_argument('--list-ports', action='store_true', help='List serial ports and exit 🔍')
     
     args = parser.parse_args()
     
     if args.list_ports:
+        print("🔍 Available ports:")
         for p in serial.tools.list_ports.comports():
             print(f"  {p.device}: {p.description}")
         return

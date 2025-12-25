@@ -10,6 +10,14 @@ DIY ambient lighting system for your monitor using Arduino and RGBW addressable 
 - 🎨 **Color Enhancement** - Adjustable saturation and brightness
 - 🔄 **Temporal Smoothing** - Eliminates flickering
 - 🔧 **Low Priority Mode** - Automatically yields to other apps
+- 🏆 **PRO Version Available** - Multithreaded with advanced optimizations
+
+## Versions Available
+
+| Version | Description | Best For |
+|---------|-------------|----------|
+| **Standard** (`ambilight.py`) | Single-threaded, simple, CPU optimized | General use, easy setup |
+| **PRO** (`ambilight_pro.py`) | Multithreaded, triple buffering, downsampling | Maximum performance, gaming |
 
 ## LED Layout
 
@@ -76,9 +84,19 @@ pip install -r requirements.txt
 
 ### Run the Application
 
+**Standard Version (Recommended):**
 ```bash
 python ambilight.py
 ```
+
+**PRO Version (Multithreaded):**
+```bash
+python ambilight_pro.py
+```
+
+**Or use the standalone executables:**
+- `Ambilight.exe` - Standard version
+- `Ambilight_Pro.exe` - PRO version (in `dist/` folder)
 
 ### Command Line Options
 
@@ -94,7 +112,9 @@ python ambilight.py
 
 ### Examples
 
-```bash, 30 FPS (recommended)
+**Standard Version:**
+```bash
+# Auto-detect Arduino, primary monitor, 30 FPS (recommended)
 python ambilight.py
 
 # Specific port and monitor
@@ -107,7 +127,45 @@ python ambilight.py --fps 20
 python ambilight.py --smoothing 0.7
 
 # Higher FPS for gaming (max recommended: 45)
-pytPerformance & Optimization
+python ambilight.py --fps 45
+
+# List available serial ports
+python ambilight.py --list-ports
+```
+
+**PRO Version (Multithreaded):**
+```bash
+# Same options as standard
+python ambilight_pro.py --fps 45
+
+# PRO version shows detailed performance stats
+# Frames Per Second: 45.2 | Capture: 12.3ms | Processing: 2.1ms | Serial Send: 1.5ms
+```
+
+## Performance & Optimization
+
+### Version Comparison
+
+| Feature | Standard | PRO |
+|---------|----------|-----|
+| Threading | Single-threaded | Multi-threaded (2 threads) |
+| Buffering | Direct | Triple buffer (3 frames) |
+| Downsampling | None | 2x (every 2nd pixel) |
+| Performance Stats | Basic FPS | Detailed timing breakdown |
+| Latency | ~30ms @ 30 FPS | ~20ms @ 30 FPS |
+| CPU Usage | Low | Lower |
+| Complexity | Simple | Advanced |
+
+**When to use Standard:**
+- Simple setup, reliable
+- Single-threaded environments
+- Easier to debug
+
+**When to use PRO:**
+- Maximum performance needed
+- Gaming with fast color changes
+- You want detailed performance metrics
+- Multi-core CPU available
 
 ### CPU Usage
 The PC app is highly optimized:
@@ -115,6 +173,7 @@ The PC app is highly optimized:
 - **Low process priority** - automatically yields CPU to other apps
 - **30 FPS default** - smooth while being CPU-friendly
 - **Pre-computed segments** - no redundant calculations
+- **PRO: Parallel capture** - separate thread for screen grabbing
 
 ### Tuning for Your System
 
