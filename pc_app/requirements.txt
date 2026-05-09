@@ -2,6 +2,7 @@
 # Install with: pip install -r requirements.txt
 
 pyserial>=3.5      # Serial communication with Arduino
-mss>=9.0.0         # Fast screen capture
+dxcam>=0.3.0       # Fast screen capture (DirectX 11 desktop duplication)
 numpy>=1.24.0      # Array operations for color processing
 psutil>=5.8.0      # Process priority management (optional)
+opencv-python>=4.8.0  # Computer vision / image processing (cv2)

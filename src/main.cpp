@@ -24,7 +24,7 @@
 
 // Serial Configuration
 #define SERIAL_RATE 115200  // High speed serial (was 115200)
-#define IDLE_TIMEOUT 1000   // ms before showing ambient color
+#define IDLE_TIMEOUT 2000   // ms before showing ambient color
 #define OFF_TIMEOUT 600000  // ms (10 min) before turning off
 
 // LED buffer: CRGBW array and RGB pointer for FastLED hack
