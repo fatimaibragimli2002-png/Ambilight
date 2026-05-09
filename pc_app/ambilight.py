@@ -38,19 +38,19 @@ CAPTURE_DEPTH = 60  # Pixels from screen edge to sample
 DOWNSAMPLE    = 4   # Sample every Nth pixel (dxcam is fast, can afford denser)
 
 # 📡 Serial
-BAUD_RATE = 115200
+BAUD_RATE = 500000
 
 # 🧵 Ring buffer size (frames held between capture and send threads)
 BUFFER_SIZE = 2
 
 # 🔋 Adaptive idle (static screen)
 STATIC_INTERVAL  = 1.0   # Seconds between captures when screen is static
-STATIC_THRESHOLD = 100   # Consecutive identical frames before entering static mode
+STATIC_THRESHOLD = 1000   # Consecutive identical frames before entering static mode
 
 # 🎯 Defaults (overridable via CLI)
 DEFAULT_PORT    = 'COM3'
 DEFAULT_MONITOR = 0
-DEFAULT_FPS     = 60
+DEFAULT_FPS     = 30
 
 # ============================================================
 
@@ -201,7 +201,9 @@ class SerialSender:
             port = self._auto_detect()
         print(f"🔌 Connecting to {port}...")
         try:
-            ser = serial.Serial(port, BAUD_RATE, timeout=1)
+            ser = serial.Serial(port, BAUD_RATE, timeout=1,
+                                write_timeout=1,
+                                dsrdtr=False, rtscts=False)
             time.sleep(2)
             ser.reset_input_buffer()
             for _ in range(30):
@@ -255,7 +257,7 @@ class SerialSender:
 class Ambilight:
     def __init__(self, port=DEFAULT_PORT, monitor=DEFAULT_MONITOR, fps=DEFAULT_FPS):
 
-        self.target_fps = min(fps, 120)
+        self.target_fps = min(fps, 240)
         self.running    = False
 
         self.capture = ScreenCapture(monitor)

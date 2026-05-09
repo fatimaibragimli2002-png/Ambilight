@@ -37,7 +37,7 @@ Run one of these commands:
 
 **Option A: Single EXE file (recommended)**
 ```bash
-python -m PyInstaller --onefile --name "Ambilight" --console ambilight.py
+python -m PyInstaller --onefile --name "Ambilight" --console --hidden-import=cv2 ambilight.py
 ```
 
 **Option B: With custom icon (optional)**

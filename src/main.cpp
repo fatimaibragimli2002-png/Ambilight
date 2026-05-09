@@ -23,8 +23,8 @@
 #define BRIGHTNESS 255
 
 // Serial Configuration
-#define SERIAL_RATE 115200  // High speed serial (was 115200)
-#define IDLE_TIMEOUT 2000   // ms before showing ambient color
+#define SERIAL_RATE 500000  // High speed serial
+#define IDLE_TIMEOUT 3000   // ms before showing ambient color
 #define OFF_TIMEOUT 600000  // ms (10 min) before turning off
 
 // LED buffer: CRGBW array and RGB pointer for FastLED hack
@@ -123,27 +123,28 @@ void loop() {
   // Clear LED buffer
   memset(leds, 0, NUM_LEDS * sizeof(CRGBW));
 
-  // Read RGB data for each LED (3 bytes per LED)
+  // Bulk-read all RGB data at once (3 bytes per LED)
+  uint8_t rgbBuf[NUM_LEDS * 3];
+  uint16_t bytesNeeded = numLeds * 3;
+  uint16_t bytesRead = 0;
+
+  Serial.setTimeout(200);
+  while (bytesRead < bytesNeeded) {
+    uint16_t got = Serial.readBytes(rgbBuf + bytesRead, bytesNeeded - bytesRead);
+    if (got == 0) break;  // Timeout — incomplete frame
+    bytesRead += got;
+  }
+
+  if (bytesRead < bytesNeeded) {
+    return;  // Drop incomplete frame
+  }
+
+  // Convert RGB to RGBW
   for (uint16_t ledIdx = 0; ledIdx < numLeds; ledIdx++) {
-    uint8_t r, g, b;
-
-    while (!Serial.available())
-      checkConnection();
-    r = Serial.read();
-
-    while (!Serial.available())
-      checkConnection();
-    g = Serial.read();
-
-    while (!Serial.available())
-      checkConnection();
-    b = Serial.read();
-
-    // Convert RGB to RGBW
-    // Extract white component from minimum of R,G,B
+    uint8_t r = rgbBuf[ledIdx * 3];
+    uint8_t g = rgbBuf[ledIdx * 3 + 1];
+    uint8_t b = rgbBuf[ledIdx * 3 + 2];
     uint8_t w = min(min(r, g), b);
-
-    // Subtract white from RGB channels
     leds[ledIdx].r = r - w;
     leds[ledIdx].g = g - w;
     leds[ledIdx].b = b - w;
