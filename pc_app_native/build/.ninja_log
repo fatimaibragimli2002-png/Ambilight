@@ -1,0 +1,9 @@
+# ninja log v6
+6	874	8002484466293024	CMakeFiles/ambilight_native.dir/src/main.cpp.obj	ab055d48154a40b9
+875	1716	8002484474984698	ambilight_native.exe	83af5c968f25ca59
+4	102	8002486051291756	build.ninja	ae6079cc285f96b5
+4	102	8002486051259600	C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build/cmake_install.cmake	ae6079cc285f96b5
+7	106	8002486051291756	build.ninja	ae6079cc285f96b5
+7	106	8002486051291756	C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build/cmake_install.cmake	ae6079cc285f96b5
+7	1311	8002486051568200	CMakeFiles/ambilight_native.dir/src/main.cpp.obj	774f3878c330aa7b
+1312	1446	8002486064626016	ambilight_native.exe	91a15977597161e3

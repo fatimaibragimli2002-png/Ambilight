@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build/CMakeFiles/ambilight_native.dir/embed.manifest"

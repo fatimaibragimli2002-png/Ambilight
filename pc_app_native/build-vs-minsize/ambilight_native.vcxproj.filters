@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Arsalan\Documents\PlatformIO\Projects\Ambilight\pc_app_native\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Arsalan\Documents\PlatformIO\Projects\Ambilight\pc_app_native\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{98CA9CA2-29D9-3E41-8F28-F1668B5FD8AE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

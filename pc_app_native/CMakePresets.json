@@ -1,0 +1,27 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "vs2026-release",
+            "displayName": "VS 2026 Release",
+            "generator": "Visual Studio 18 2026",
+            "binaryDir": "${sourceDir}/build-vs",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "vs2026-release",
+            "displayName": "Build VS 2026 Release",
+            "configurePreset": "vs2026-release",
+            "configuration": "Release"
+        }
+    ]
+}

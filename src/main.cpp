@@ -23,7 +23,7 @@
 #define BRIGHTNESS 255
 
 // Serial Configuration
-#define SERIAL_RATE 500000  // High speed serial
+#define SERIAL_RATE 200000  // High speed serial
 #define IDLE_TIMEOUT 3000   // ms before showing ambient color
 #define OFF_TIMEOUT 600000  // ms (10 min) before turning off
 
@@ -128,10 +128,10 @@ void loop() {
   uint16_t bytesNeeded = numLeds * 3;
   uint16_t bytesRead = 0;
 
-  Serial.setTimeout(200);
   while (bytesRead < bytesNeeded) {
     uint16_t got = Serial.readBytes(rgbBuf + bytesRead, bytesNeeded - bytesRead);
-    if (got == 0) break;  // Timeout — incomplete frame
+    if (got == 0)
+      break;  // Timeout — incomplete frame
     bytesRead += got;
   }
 

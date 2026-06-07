@@ -1,0 +1,10 @@
+^C:\USERS\ARSALAN\DOCUMENTS\PLATFORMIO\PROJECTS\AMBILIGHT\PC_APP_NATIVE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native -BC:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build-vs-minsize --check-stamp-file C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build-vs-minsize/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

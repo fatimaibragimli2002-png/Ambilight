@@ -1,298 +1,213 @@
-# Ambilight System - CPU Optimized
+# 💡 Ambilight
 
-DIY ambient lighting system for your monitor using Arduino and RGBW addressable LEDs.
+DIY ambient lighting that mirrors your monitor's edge colors onto SK6812 RGBW LED strips using Adalight serial frames.
 
-## Features
+| Component | Location |
+|-----------|----------|
+| 🔧 Arduino firmware | `src/main.cpp` |
+| 🐍 Python sender | `pc_app/ambilight.py` |
+| ⚡ Native C++ sender | `pc_app_native/` |
 
-- ✨ **RGBW Support** - SK6812 RGBW LEDs with white channel
-- 🚀 **CPU Optimized** - Captures only screen edges (not full screen)
-- ⚡ **Fast & Smooth** - 30 FPS default with low system impact
-- 🎨 **Color Enhancement** - Adjustable saturation and brightness
-- 🔄 **Temporal Smoothing** - Eliminates flickering
-- 🔧 **Low Priority Mode** - Automatically yields to other apps
-- 🏆 **PRO Version Available** - Multithreaded with advanced optimizations
+---
 
-## Versions Available
-
-| Version | Description | Best For |
-|---------|-------------|----------|
-| **Standard** (`ambilight.py`) | Single-threaded, simple, CPU optimized | General use, easy setup |
-| **PRO** (`ambilight_pro.py`) | Multithreaded, triple buffering, downsampling | Maximum performance, gaming |
-
-## LED Layout
+## 🖥️ LED Layout
 
 ```
-          ┌───────────────────────────────────────┐
-          │             TOP (35 LEDs)             │
-          │           ← left to right →           │
-      ┌───┼─────────────────────────────────────┬─┼─┐
-      │ L │                                     │ R │
-      │ E │                                     │ I │
-      │ F │                                     │ G │
-      │ T │               MONITOR               │ H │
-      │   │                                     │ T │
-      │ 19│                                     │ 19│
-      │   │                                     │   │
-      │ ↑ │                                     │ ↓ │
-      └─┬─┴─────────────────────────────────────┴─┬─┘
-        │                                         │
-      START                                      END
-  (bottom left)                            (bottom right)
+     ┌────────────────── TOP (35) ──────────────────┐
+     │              ← left to right →               │
+ ┌───┤                                              ├───┐
+ │ L │                                              │ R │
+ │ E │                                              │ I │
+ │ F │               MONITOR                        │ G │
+ │ T │                                              │ H │
+ │19 │                                              │T19│
+ │ ↑ │                                              │ ↓ │
+ └───┴──────────────────────────────────────────────┴───┘
+  START                                               END
 ```
 
-Total: 73 LEDs (19 left + 35 top + 19 right)
+- **Left** — 19 LEDs, bottom → top
+- **Top** — 35 LEDs, left → right
+- **Right** — 19 LEDs, top → bottom
+- **Total** — 73 LEDs
 
-## Hardware Requirements
+---
 
-- Arduino Nano (or compatible)
-- SK6812 RGBW addressable LED strip (73+ LEDs)
-- 5V power supply (at least 3A recommended for 73 LEDs)
-- USB cable for Arduino
+## 🔩 Hardware
 
-> **Note**: This project is optimized for SK6812 RGBW LEDs. For standard RGB LEDs (WS2812B), you'll need to modify the Arduino code.
+| Item | Spec |
+|------|------|
+| Microcontroller | Arduino Nano (or compatible) |
+| LED strip | SK6812 RGBW, 73+ LEDs |
+| Power supply | 5 V, 3 A+ |
+| Connection | Shared GND between PSU and Arduino |
 
-## Wiring
+## 🔌 Wiring
 
-1. **LED Data Pin** → Arduino Pin 6
-2. **LED VCC** → 5V Power Supply (+)
-3. **LED GND** → 5V Power Supply (-) AND Arduino GND
-4. **Arduino** → USB to PC 
+1. LED **data** → Arduino **pin 9**
+2. LED **VCC** → external 5V PSU
+3. LED **GND** → PSU GND **and** Arduino GND
+4. Arduino → PC via USB
 
-> ⚠️ **Important**: Don't power more than a few LEDs directly from Arduino 5V pin. Use an external 5V power supply for the LED strip.
+> ⚠️ Never power the LED strip from the Arduino 5V pin — use the external PSU.
 
-## Arduino Setup (or Arduino IDE)
-2. Ensure `include/FastLED_RGBW.h` is present (RGBW support hack)
-3. Verify the LED configuration in `src/main.cpp`:
-   - `LED_PIN`: Data pin (default: 6)
-   - `NUM_LEDS`: Total LED count (default: 73)
-   - Serial baud: **115200** (must match PC app)
-4. Build and upload to Arduino
-5. Open Serial Monitor - wait for "Ada" message (ready signal)
+---
 
-> **Baud Rate**: Both Arduino and PC app use **115200 baud**. Higher rates may cause upload issues. (default: WS2812B)
-   - `COLOR_ORDER`: Color order (default: GRB)
-3. Build and upload to Arduino
+## 🔼 Firmware Upload
 
-## PC Application Setup
+From the `Ambilight` folder:
 
-### Install Python Dependencies
+```powershell
+pio run -t upload
+```
 
-```bash
+Firmware defaults (`src/main.cpp`):
+
+| Setting | Value |
+|---------|-------|
+| LEDs | 73 |
+| Serial baud | 115200 |
+| LED pin | 9 |
+| Protocol | Adalight |
+| Idle timeout | 3 s (warm amber) |
+| Off timeout | 10 min (fade out) |
+
+---
+
+## 🐍 Python Sender — Quick Start
+
+> Easiest to set up. Uses DXcam (DirectX 11 desktop duplication).
+
+```powershell
 cd pc_app
 pip install -r requirements.txt
+python ambilight.py --port COM3 --monitor 0 --fps 30 --profile
 ```
-
-### Run the Application
-
-**Standard Version (Recommended):**
-```bash
-python ambilight.py
-```
-
-**PRO Version (Multithreaded):**
-```bash
-python ambilight_pro.py
-```
-
-**Or use the standalone executables:**
-- `Ambilight.exe` - Standard version
-- `Ambilight_Pro.exe` - PRO version (in `dist/` folder)
-
-### Command Line Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--port`, `-p` | Serial port (e.g., COM3) | Auto-detect |
-| `--monitor`, `-m` | Monitor number | 0 (primary) |
-| `--smoothing` | Temporal smoothing (0.0-1.0) | 0.6 |
-| `--fps`, `-f` | Target frames per second | 30 |
-| `--brightness`, `-b` | LED brightness (0-255) | 255 |
-| `--saturation`, `-s` | Color saturation boost | 1.2 |
-| `--list-ports` | List available serial ports | - |
 
 ### Examples
 
-**Standard Version:**
-```bash
-# Auto-detect Arduino, primary monitor, 30 FPS (recommended)
+```powershell
+# Minimal — auto-detect port, primary monitor, 30 FPS
 python ambilight.py
 
-# Specific port and monitor
-python ambilight.py --port COM3 --monitor 1
+# Specific COM port and second monitor
+python ambilight.py --port COM5 --monitor 1
 
-# Lower CPU usage (20 FPS)
-python ambilight.py --fps 20
+# Gaming — max FPS, no smoothing
+python ambilight.py --fps 60 --smoothing 1.0
 
-# Smoother transitions (higher smoothing)
-python ambilight.py --smoothing 0.7
-
-# Higher FPS for gaming (max recommended: 45)
-python ambilight.py --fps 45
-
-# List available serial ports
-python ambilight.py --list-ports
-```
-
-**PRO Version (Multithreaded):**
-```bash
-# Same options as standard
-python ambilight_pro.py --fps 45
-
-# PRO version shows detailed performance stats
-# Frames Per Second: 45.2 | Capture: 12.3ms | Processing: 2.1ms | Serial Send: 1.5ms
-```
-
-## Performance & Optimization
-
-### Version Comparison
-
-| Feature | Standard | PRO |
-|---------|----------|-----|
-| Threading | Single-threaded | Multi-threaded (2 threads) |
-| Buffering | Direct | Triple buffer (3 frames) |
-| Downsampling | None | 2x (every 2nd pixel) |
-| Performance Stats | Basic FPS | Detailed timing breakdown |
-| Latency | ~30ms @ 30 FPS | ~20ms @ 30 FPS |
-| CPU Usage | Low | Lower |
-| Complexity | Simple | Advanced |
-
-**When to use Standard:**
-- Simple setup, reliable
-- Single-threaded environments
-- Easier to debug
-
-**When to use PRO:**
-- Maximum performance needed
-- Gaming with fast color changes
-- You want detailed performance metrics
-- Multi-core CPU available
-
-### CPU Usage
-The PC app is highly optimized:
-- **Captures only screen edges** (not full screen) - ~90% less data
-- **Low process priority** - automatically yields CPU to other apps
-- **30 FPS default** - smooth while being CPU-friendly
-- **Pre-computed segments** - no redundant calculations
-- **PRO: Parallel capture** - separate thread for screen grabbing
-
-### Tuning for Your System
-
-**For lower CPU usage:**
-```bash
+# Ambient / low-power — lower FPS, light smoothing
 python ambilight.py --fps 20 --smoothing 0.7
-```
 
-**For smoother/faster response:**
-```bash
-python ambilight.py --fps 45 --smoothing 0.4
-```
+# Skip identical frames to save CPU
+python ambilight.py --frame-skip-threshold 5 --frame-skip-stride 16
 
-**Recommended FPS ranges:**
-- 20 FPS: Minimal CPU, still smooth for videos
-- 30 FPS: Balanc30  # Pixels from screen edge to sample (smaller = faster)
-```
+# Auto-idle when screen is static
+python ambilight.py --idle-fps 5 --idle-seconds 3.0
 
-### Smoothing & Response
+# See profiling breakdown
+python ambilight.py --profile
 
-Adjust temporal smoothing for your preference:
-- `--smoothing 0.3`: Very smooth, slower response
-- `--smoothing 0.6`: Balanced (default)
-- `--smoothing 0.8`: Fast response, may flicker slightlyist available serial ports
+# List all COM ports
 python ambilight.py --list-ports
 ```
 
-## Customization
+See `pc_app/README.md` for full option reference.
 
-### Changing LED Count
+---
 
-If your LED setup is different, update both files:
+## ⚡ Native C++ Sender — Quick Start
 
-1. **Ardushow only white or wrong colors
-- This project uses RGBW LEDs (SK6812) with custom FastLED_RGBW.h
-- Arduino receives RGB and converts to RGBW internally
-- Check that `FastLED_RGBW.h` is in the `include/` folder
+> Lowest CPU usage. GPU compute shader averages regions — only ~1 KB readback per frame.
 
-### LEDs don't light up
-- Check wiring connections (Data to Pin 6, GND to GND)
-- Verify power supply is adequate (3A+ for 73 LEDs)
-- Open Serial Monitor at 115200 baud - look for "Ada" message
+```powershell
+cd pc_app_native
 
-### Upload fails / "Arduino not responding"
-- Disconnect PC app before uploading
-- Use upload speed 57600 (set in platformio.ini)
-- If using high baud rate, revert to 115200
+# Configure (once)
+"C:\Program Files\CMake\bin\cmake.exe" --preset vs2026-release
 
-### Serial connection fails
-- Check if Arduino is connected: `python ambilight.py --list-ports`
-- On Windows: Check Device Manager for COM port
-- On Linux: Add user to dialout group: `sudo usermod -a -G dialout $USER`
+# Build
+"C:\Program Files\CMake\bin\cmake.exe" --build --preset vs2026-release
 
-### High CPU usage / PC slowdown
-- Lower FPS: `python ambilight.py --fps 20`
-- Increase smoothing: `python ambilight.py --smoothing 0.7`
-- TTechnical Details
+# Run
+.\build-vs\Release\ambilight_native.exe --port COM3 --baud 115200 --fps 60 --monitor 0 --profile
+```
 
-### RGBW Support
-This project uses SK6812 RGBW LEDs with a FastLED hack:
-- Arduino receives **RGB** data (3 bytes per LED)
-- Converts to **RGBW** internally using FastLED_RGBW.h
-- Extracts white channel: `W = min(R, G, B)`
-- See `include/FastLED_RGBW.h` for implementation
+> 📌 Firmware default baud is **115200** — always pass `--baud 115200` unless you change the firmware.
 
-### Baud Rate
-- Fixed at **115200 baud**
-- Higher rates (500000) cause upload conflicts
-- Sufficient for 73 LEDs @ 30 FPS
+### Examples
 
-### Protocol
+```powershell
+# Standard — COM3, primary monitor, 60 FPS
+.\build-vs\Release\ambilight_native.exe --port COM3 --baud 115200 --fps 60
 
-The system uses a simplified Adalight protocol:
+# With profiling to see per-stage timings
+.\build-vs\Release\ambilight_native.exe --port COM3 --baud 115200 --fps 60 --profile
 
-| Byte | Description |
-|------|-------------|
-| 0-2 | Header: "Ada" |
-| 3 | LED count high byte |
+# Second monitor
+.\build-vs\Release\ambilight_native.exe --port COM3 --baud 115200 --monitor 1 --fps 60
+
+# Reduce compute load (sample every 4th pixel)
+.\build-vs\Release\ambilight_native.exe --port COM3 --baud 115200 --downscale 4
+
+# Smooth transitions (0.3 = heavy smooth, 1.0 = off)
+.\build-vs\Release\ambilight_native.exe --port COM3 --baud 115200 --smoothing 0.3
+
+# List COM ports
+.\build-vs\Release\ambilight_native.exe --list-ports
+```
+
+See `pc_app_native/README.md` for full build and option reference.
+
+---
+
+## 🆚 Sender Comparison
+
+| Feature | Python | Native C++ |
+|---------|--------|------------|
+| Setup effort | pip install | CMake + MSVC |
+| Capture API | DXcam (DXGI) | DXGI Desktop Duplication |
+| Region averaging | NumPy (CPU) | GPU compute shader |
+| GPU→CPU transfer | Full frame RGB | ~1 KB (73 float4s) |
+| CPU usage | Very low | Near zero |
+| Platform | Any Python 3 | Windows only |
+
+---
+
+## 🔧 Troubleshooting
+
+### ❌ No LEDs / wrong port
+- Run with `--list-ports` to see available COM ports
+- Check Device Manager on Windows
+
+### ❌ `d3d11.h: no include path set`
+- Use the preset-based build in `pc_app_native/README.md` — it sets up VS environment automatically
+
+### ❌ Flickering or too much CPU
+- Lower `--fps`
+- Add `--smoothing 0.5`
+- Increase `--downscale 4`
+
+### ❌ Native exe stuck at 60 FPS
+- Expected at 60 Hz — desktop duplication delivers at monitor refresh rate
+- Get a 144 Hz monitor for higher unique frame rates
+
+### ❌ Upload fails
+- Disconnect the sender app before uploading firmware
+- Try baud rate 57600 in `platformio.ini` for upload
+
+---
+
+## 📡 Protocol Reference
+
+Adalight frame format sent each render:
+
+| Bytes | Content |
+|-------|---------|
+| 0–2 | `Ada` (ASCII header) |
+| 3 | LED count high byte (`LEDS_TOTAL − 1`) |
 | 4 | LED count low byte |
-| 5 | Checksum (hi ^ lo ^ 0x55) |
-| 6+ | RGB data (3 bytes per LED) |
+| 5 | Checksum: `hi ^ lo ^ 0x55` |
+| 6+ | RGB payload: 73 LEDs × 3 bytes = **219 bytes** |
 
-Arduino responds with "Ada\n" on startup for handshake.
-
-### LEDs don't light up
-- Check wiring connections
-- Verify power supply is adequate
-- Ensure correct LED_TYPE and COLOR_ORDER in code
-
-### Colors are wrong
-- Try different COLOR_ORDER values: GRB, RGB, BRG, etc.
-- Check LED_TYPE matches your strip
-
-### Flickering
-- Lower the `--fps` value
-- Increase smoothing in the Python script
-
-### Serial connection fails
-- Check if Arduino is connected
-- Use `--list-ports` to see available ports
-- On Windows, check Device Manager for correct COM port
-- On Linux, you may need to add user to `dialout` group
-
-### High CPU usage
-- Lower the `--fps` value
-- Increase CAPTURE_DEPTH (larger areas sample faster)
-
-## Protocol
-
-The system uses a simplified Adalight protocol:
-
-| Byte | Description |
-|------|-------------|
-| 0-2 | Header: "Ada" |
-| 3 | LED count high byte |
-| 4 | LED count low byte |
-| 5 | Checksum (hi ^ lo ^ 0x55) |
-| 6+ | RGB data (3 bytes per LED) |
-
-## License
-
-MIT License - Feel free to modify and share!
+Arduino responds with `Ada\n` on startup as a ready signal.

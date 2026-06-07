@@ -1,0 +1,3 @@
+C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build/CMakeFiles/ambilight_native.dir
+C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build/CMakeFiles/edit_cache.dir
+C:/Users/Arsalan/Documents/PlatformIO/Projects/Ambilight/pc_app_native/build/CMakeFiles/rebuild_cache.dir
